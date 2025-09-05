@@ -156,101 +156,256 @@ Data source: ${data.dataSource}`;
 
   const getSignalColor = (signal) => {
     const colors = {
-      'BUY': 'text-green-600 bg-green-100',
-      'SELL': 'text-red-600 bg-red-100', 
-      'HOLD': 'text-yellow-600 bg-yellow-100'
+      'BUY': { color: '#16a34a', backgroundColor: '#f0fdf4' },
+      'SELL': { color: '#dc2626', backgroundColor: '#fef2f2' }, 
+      'HOLD': { color: '#ca8a04', backgroundColor: '#fefce8' }
     };
-    return colors[signal] || 'text-gray-600 bg-gray-100';
+    return colors[signal] || { color: '#6b7280', backgroundColor: '#f9fafb' };
   };
 
   const getSignalIcon = (signal) => {
     const icons = {
-      'BUY': <TrendingUp className="w-4 h-4" />,
-      'SELL': <TrendingDown className="w-4 h-4" />,
-      'HOLD': <AlertTriangle className="w-4 h-4" />
+      'BUY': <TrendingUp style={{ width: '1rem', height: '1rem' }} />,
+      'SELL': <TrendingDown style={{ width: '1rem', height: '1rem' }} />,
+      'HOLD': <AlertTriangle style={{ width: '1rem', height: '1rem' }} />
     };
     return icons[signal];
   };
 
+  const containerStyle = {
+    maxWidth: '80rem',
+    margin: '0 auto',
+    padding: '1.5rem',
+    backgroundColor: '#f9fafb',
+    minHeight: '100vh',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif'
+  };
+
+  const cardStyle = {
+    backgroundColor: '#ffffff',
+    borderRadius: '0.5rem',
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+    padding: '1.5rem',
+    marginBottom: '1.5rem',
+    border: '1px solid #e5e7eb'
+  };
+
+  const headerStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '1.5rem'
+  };
+
+  const titleStyle = {
+    fontSize: '1.875rem',
+    fontWeight: '700',
+    color: '#111827'
+  };
+
+  const statusBoxStyle = {
+    backgroundColor: '#f0fdf4',
+    border: '1px solid #bbf7d0',
+    padding: '1rem',
+    marginBottom: '1.5rem',
+    borderRadius: '0.5rem'
+  };
+
+  const statusTitleStyle = {
+    fontSize: '1.125rem',
+    fontWeight: '600',
+    color: '#166534',
+    marginBottom: '0.5rem'
+  };
+
+  const statusTextStyle = {
+    fontSize: '0.875rem',
+    color: '#15803d'
+  };
+
+  const sectionStyle = {
+    backgroundColor: '#f9fafb',
+    borderRadius: '0.5rem',
+    padding: '1rem',
+    marginBottom: '1.5rem'
+  };
+
+  const sectionTitleStyle = {
+    fontSize: '1.125rem',
+    fontWeight: '600',
+    marginBottom: '0.75rem',
+    color: '#111827'
+  };
+
+  const inputStyle = {
+    flex: '1',
+    padding: '0.5rem 0.75rem',
+    border: '1px solid #d1d5db',
+    borderRadius: '0.375rem',
+    fontSize: '0.875rem',
+    outline: 'none'
+  };
+
+  const buttonStyle = {
+    padding: '0.5rem 1rem',
+    backgroundColor: '#2563eb',
+    color: '#ffffff',
+    borderRadius: '0.375rem',
+    border: 'none',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    transition: 'background-color 0.2s'
+  };
+
+  const greenButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: '#16a34a'
+  };
+
+  const purpleButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: '#9333ea'
+  };
+
+  const stockCardStyle = {
+    backgroundColor: '#ffffff',
+    border: '1px solid #e5e7eb',
+    borderRadius: '0.5rem',
+    padding: '1rem'
+  };
+
+  const gridStyle = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gap: '1.5rem'
+  };
+
+  const flexStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    marginBottom: '1rem'
+  };
+
+  const tagStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.25rem',
+    padding: '0.25rem 0.75rem',
+    borderRadius: '9999px',
+    fontSize: '0.75rem',
+    fontWeight: '500'
+  };
+
+  const loadingStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '8rem'
+  };
+
+  const spinnerStyle = {
+    width: '2rem',
+    height: '2rem',
+    border: '2px solid #e5e7eb',
+    borderTopColor: '#2563eb',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite'
+  };
+
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-gray-50 min-h-screen">
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Stock Risk Management Analyzer</h1>
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <Clock className="w-4 h-4" />
+    <div style={containerStyle}>
+      <style jsx>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        button:hover {
+          opacity: 0.9;
+        }
+        input:focus {
+          border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+      `}</style>
+
+      <div style={cardStyle}>
+        <div style={headerStyle}>
+          <h1 style={titleStyle}>Stock Risk Management Analyzer</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: '#6b7280' }}>
+            <Clock style={{ width: '1rem', height: '1rem' }} />
             <span>Live Data • Last Update: {lastUpdate?.toLocaleString() || 'Never'}</span>
           </div>
         </div>
 
-        <div className="bg-green-50 border border-green-200 p-4 mb-6 rounded-lg">
-          <h3 className="text-lg font-semibold text-green-800 mb-2">🚀 Live Finnhub Data Integration</h3>
-          <div className="text-sm text-green-700">
+        <div style={statusBoxStyle}>
+          <h3 style={statusTitleStyle}>🚀 Live Finnhub Data Integration</h3>
+          <div style={statusTextStyle}>
             <p><strong>✅ Connected to live Finnhub API via Vercel serverless functions!</strong></p>
-            <p className="text-xs mt-2">Real-time stock prices, daily changes, and market data flowing directly from Finnhub.io</p>
+            <p style={{ fontSize: '0.75rem', marginTop: '0.5rem' }}>Real-time stock prices, daily changes, and market data flowing directly from Finnhub.io</p>
           </div>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <h2 className="text-lg font-semibold mb-3">Portfolio Management</h2>
-          <div className="flex items-center space-x-3 mb-4">
+        <div style={sectionStyle}>
+          <h2 style={sectionTitleStyle}>Portfolio Management</h2>
+          <div style={flexStyle}>
             <input
               type="text"
               value={newStock}
               onChange={(e) => setNewStock(e.target.value.toUpperCase())}
               placeholder="Enter stock ticker (e.g., AAPL)"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              style={inputStyle}
               onKeyPress={(e) => e.key === 'Enter' && addStock()}
             />
-            <button
-              onClick={addStock}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center space-x-2"
-            >
-              <Plus className="w-4 h-4" />
+            <button onClick={addStock} style={buttonStyle}>
+              <Plus style={{ width: '1rem', height: '1rem' }} />
               <span>Add Stock</span>
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
             {stocks.map(ticker => (
-              <div key={ticker} className="flex items-center bg-white px-3 py-1 rounded-full border">
-                <span className="font-medium">{ticker}</span>
-                <button onClick={() => removeStock(ticker)} className="ml-2 text-red-500 hover:text-red-700">
-                  <Trash2 className="w-4 h-4" />
+              <div key={ticker} style={{ display: 'flex', alignItems: 'center', backgroundColor: '#ffffff', padding: '0.25rem 0.75rem', borderRadius: '9999px', border: '1px solid #e5e7eb' }}>
+                <span style={{ fontWeight: '500' }}>{ticker}</span>
+                <button 
+                  onClick={() => removeStock(ticker)} 
+                  style={{ marginLeft: '0.5rem', color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem' }}
+                >
+                  <Trash2 style={{ width: '1rem', height: '1rem' }} />
                 </button>
               </div>
             ))}
           </div>
 
-          <div className="flex space-x-3">
-            <button
-              onClick={runAllAnalysis}
-              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center space-x-2"
-            >
-              <Play className="w-4 h-4" />
+          <div style={flexStyle}>
+            <button onClick={runAllAnalysis} style={greenButtonStyle}>
+              <Play style={{ width: '1rem', height: '1rem' }} />
               <span>Run Live Analysis</span>
             </button>
-            <button
-              onClick={exportToSpreadsheet}
-              className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 flex items-center space-x-2"
-            >
-              <Download className="w-4 h-4" />
+            <button onClick={exportToSpreadsheet} style={purpleButtonStyle}>
+              <Download style={{ width: '1rem', height: '1rem' }} />
               <span>Export Results</span>
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div style={gridStyle}>
           {stocks.map(ticker => {
             const data = analysisData[ticker];
             const isLoading = loading[ticker];
             
             return (
-              <div key={ticker} className="bg-white border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-bold">{ticker}</h3>
+              <div key={ticker} style={stockCardStyle}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: '700' }}>{ticker}</h3>
                   {data && (
-                    <div className={`px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1 ${getSignalColor(data.signal)}`}>
+                    <div style={{
+                      ...tagStyle,
+                      ...getSignalColor(data.signal)
+                    }}>
                       {getSignalIcon(data.signal)}
                       <span>{data.signal}</span>
                     </div>
@@ -258,63 +413,92 @@ Data source: ${data.dataSource}`;
                 </div>
 
                 {isLoading ? (
-                  <div className="flex items-center justify-center h-32">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <div style={loadingStyle}>
+                    <div style={spinnerStyle}></div>
                   </div>
                 ) : data ? (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.875rem' }}>
                       <div>
-                        <span className="text-gray-600">Price:</span>
-                        <span className="ml-2 font-medium">${data.currentPrice}</span>
+                        <span style={{ color: '#6b7280' }}>Price:</span>
+                        <span style={{ marginLeft: '0.5rem', fontWeight: '500' }}>${data.currentPrice}</span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Change:</span>
-                        <span className={`ml-2 font-medium ${parseFloat(data.dailyChangePercent) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <span style={{ color: '#6b7280' }}>Change:</span>
+                        <span style={{ 
+                          marginLeft: '0.5rem', 
+                          fontWeight: '500',
+                          color: parseFloat(data.dailyChangePercent) >= 0 ? '#16a34a' : '#dc2626'
+                        }}>
                           {data.dailyChangePercent}%
                         </span>
                       </div>
                       <div>
-                        <span className="text-gray-600">RSI:</span>
-                        <span className="ml-2 font-medium">{data.rsi}</span>
+                        <span style={{ color: '#6b7280' }}>RSI:</span>
+                        <span style={{ marginLeft: '0.5rem', fontWeight: '500' }}>{data.rsi}</span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Risk:</span>
-                        <span className="ml-2 font-medium">{data.riskScore}/100</span>
+                        <span style={{ color: '#6b7280' }}>Risk:</span>
+                        <span style={{ marginLeft: '0.5rem', fontWeight: '500' }}>{data.riskScore}/100</span>
                       </div>
                     </div>
 
-                    <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
-                      <div className="text-sm font-semibold text-indigo-800 mb-2">📊 Risk Ranges</div>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-indigo-700">Short Term:</span>
-                          <span className="font-mono text-indigo-900">{data.riskRanges.shortTerm}</span>
+                    <div style={{
+                      backgroundColor: '#eef2ff',
+                      border: '1px solid #c7d2fe',
+                      borderRadius: '0.5rem',
+                      padding: '0.75rem'
+                    }}>
+                      <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#3730a3', marginBottom: '0.5rem' }}>📊 Risk Ranges</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#4338ca' }}>Short Term:</span>
+                          <span style={{ fontFamily: 'monospace', color: '#312e81' }}>{data.riskRanges.shortTerm}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-purple-700">Medium Term:</span>
-                          <span className="font-mono text-purple-900">{data.riskRanges.mediumTerm}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#7c3aed' }}>Medium Term:</span>
+                          <span style={{ fontFamily: 'monospace', color: '#581c87' }}>{data.riskRanges.mediumTerm}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-xs text-center text-gray-500">
+                    <div style={{ fontSize: '0.75rem', textAlign: 'center', color: '#6b7280' }}>
                       Source: {data.dataSource}
                     </div>
 
                     <button
                       onClick={() => generateFullReport(ticker)}
-                      className="w-full px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm flex items-center justify-center space-x-2"
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        backgroundColor: '#4f46e5',
+                        color: '#ffffff',
+                        borderRadius: '0.375rem',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem'
+                      }}
                     >
-                      <FileText className="w-4 h-4" />
+                      <FileText style={{ width: '1rem', height: '1rem' }} />
                       <span>Full Report</span>
                     </button>
                   </div>
                 ) : (
-                  <div className="text-center text-gray-500 py-8">
+                  <div style={{ textAlign: 'center', color: '#6b7280', padding: '2rem 0' }}>
                     <button
                       onClick={() => runAnalysis(ticker)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      style={{
+                        padding: '0.5rem 1rem',
+                        backgroundColor: '#2563eb',
+                        color: '#ffffff',
+                        borderRadius: '0.375rem',
+                        border: 'none',
+                        cursor: 'pointer'
+                      }}
                     >
                       Analyze with Live Data
                     </button>
@@ -326,38 +510,38 @@ Data source: ${data.dataSource}`;
         </div>
 
         {Object.keys(analysisData).length > 0 && (
-          <div className="mt-8 bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Portfolio Summary</h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-              <div className="bg-white p-4 rounded-lg">
-                <div className="text-2xl font-bold text-gray-900">{stocks.length}</div>
-                <div className="text-sm text-gray-600">Total Stocks</div>
+          <div style={{ marginTop: '2rem', backgroundColor: '#f9fafb', borderRadius: '0.5rem', padding: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem' }}>Portfolio Summary</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', textAlign: 'center' }}>
+              <div style={{ backgroundColor: '#ffffff', padding: '1rem', borderRadius: '0.5rem' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>{stocks.length}</div>
+                <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Total Stocks</div>
               </div>
-              <div className="bg-white p-4 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">
+              <div style={{ backgroundColor: '#ffffff', padding: '1rem', borderRadius: '0.5rem' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#16a34a' }}>
                   {Object.values(analysisData).filter(d => d?.signal === 'BUY').length}
                 </div>
-                <div className="text-sm text-gray-600">Buy Signals</div>
+                <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Buy Signals</div>
               </div>
-              <div className="bg-white p-4 rounded-lg">
-                <div className="text-2xl font-bold text-red-600">
+              <div style={{ backgroundColor: '#ffffff', padding: '1rem', borderRadius: '0.5rem' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#dc2626' }}>
                   {Object.values(analysisData).filter(d => d?.signal === 'SELL').length}
                 </div>
-                <div className="text-sm text-gray-600">Sell Signals</div>
+                <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Sell Signals</div>
               </div>
-              <div className="bg-white p-4 rounded-lg">
-                <div className="text-2xl font-bold text-yellow-600">
+              <div style={{ backgroundColor: '#ffffff', padding: '1rem', borderRadius: '0.5rem' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#ca8a04' }}>
                   {Object.values(analysisData).filter(d => d?.signal === 'HOLD').length}
                 </div>
-                <div className="text-sm text-gray-600">Hold Signals</div>
+                <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Hold Signals</div>
               </div>
-              <div className="bg-white p-4 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">
+              <div style={{ backgroundColor: '#ffffff', padding: '1rem', borderRadius: '0.5rem' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#9333ea' }}>
                   {Object.values(analysisData).length > 0 
                     ? (Object.values(analysisData).reduce((sum, d) => sum + (d?.riskScore || 0), 0) / Object.values(analysisData).length).toFixed(0)
                     : 0}
                 </div>
-                <div className="text-sm text-gray-600">Avg Risk Score</div>
+                <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Avg Risk Score</div>
               </div>
             </div>
           </div>
@@ -365,22 +549,98 @@ Data source: ${data.dataSource}`;
       </div>
 
       {showFullReport && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={() => setShowFullReport(false)}>
-          <div className="bg-white rounded-lg w-full max-w-4xl h-full max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b bg-gray-50">
-              <h2 className="text-lg font-semibold text-gray-900">Full Risk Analysis - {selectedStock}</h2>
-              <button onClick={() => setShowFullReport(false)} className="text-gray-500 hover:text-gray-700 rounded-full p-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 50,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem'
+          }}
+          onClick={() => setShowFullReport(false)}
+        >
+          <div 
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '0.5rem',
+              width: '100%',
+              maxWidth: '64rem',
+              height: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '1rem',
+              borderBottom: '1px solid #e5e7eb',
+              backgroundColor: '#f9fafb'
+            }}>
+              <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>
+                Full Risk Analysis - {selectedStock}
+              </h2>
+              <button 
+                onClick={() => setShowFullReport(false)}
+                style={{
+                  color: '#6b7280',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '0.5rem',
+                  borderRadius: '0.25rem'
+                }}
+              >
+                <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-4">
-              <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed font-sans">{fullReport}</pre>
+            <div style={{ flex: 1, overflow: 'auto', padding: '1rem' }}>
+              <pre style={{
+                whiteSpace: 'pre-wrap',
+                fontSize: '0.875rem',
+                color: '#374151',
+                lineHeight: '1.6',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif'
+              }}>
+                {fullReport}
+              </pre>
             </div>
-            <div className="flex items-center justify-between p-4 border-t bg-gray-50">
-              <div className="text-sm text-gray-500">Generated for {selectedStock} • {new Date().toLocaleString()}</div>
-              <button onClick={() => setShowFullReport(false)} className="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700">Close</button>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '1rem',
+              borderTop: '1px solid #e5e7eb',
+              backgroundColor: '#f9fafb'
+            }}>
+              <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                Generated for {selectedStock} • {new Date().toLocaleString()}
+              </div>
+              <button 
+                onClick={() => setShowFullReport(false)}
+                style={{
+                  padding: '0.25rem 0.75rem',
+                  backgroundColor: '#6b7280',
+                  color: '#ffffff',
+                  borderRadius: '0.25rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem'
+                }}
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
