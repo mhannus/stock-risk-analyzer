@@ -1,4 +1,4 @@
-/ FILE: pages/index.js (Main React Component)
+(Main React Component)
 import React, { useState } from 'react';
 import { Download, Plus, Trash2, Play, Clock, TrendingUp, TrendingDown, AlertTriangle, FileText } from 'lucide-react';
 
@@ -485,4 +485,3 @@ The current price positioning suggests ${stockData.signal === 'BUY' ? 'potential
   );
 }
 
-// ==========================================
