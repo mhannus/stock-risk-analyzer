@@ -606,15 +606,14 @@ Data source: ${data.dataSource}`;
               </button>
             </div>
             <div style={{ flex: 1, overflow: 'auto', padding: '1rem' }}>
-              <pre style={{
-                whiteSpace: 'pre-wrap',
-                fontSize: '0.875rem',
-                color: '#374151',
-                lineHeight: '1.6',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif'
-              }}>
-                {fullReport}
-              </pre>
+              <div 
+                style={{
+                  fontSize: '0.875rem',
+                  lineHeight: '1.6',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif'
+                }}
+                dangerouslySetInnerHTML={{ __html: fullReport }}
+              />
             </div>
             <div style={{
               display: 'flex',
