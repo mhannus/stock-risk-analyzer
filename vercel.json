@@ -1,1 +1,13 @@
+// FILE: vercel.json
+{
+  "functions": {
+    "api/stock-data.js": {
+      "maxDuration": 10
+    }
+  },
+  "env": {
+    "FINNHUB_API_KEY": "@finnhub-api-key"
+  }
+}
 
+// ==========================================
