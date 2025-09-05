@@ -557,7 +557,7 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
-                      a.download = `${selectedStock}_Risk_Analysis_Report_${new Date().toISOString().split('T')[0]}.txt`;
+                      a.download = `${selectedStock}_AI_Risk_Analysis_${new Date().toISOString().split('T')[0]}.txt`;
                       document.body.appendChild(a);
                       a.click();
                       document.body.removeChild(a);
@@ -566,7 +566,7 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
                     className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
                   >
                     <Download className="w-4 h-4" />
-                    Download Text Report
+                    Download AI Report (TXT)
                   </button>
                   
                   <button
@@ -575,7 +575,7 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${selectedStock} Risk Analysis Report</title>
+    <title>${selectedStock} AI-Enhanced Risk Analysis Report</title>
     <meta charset="UTF-8">
     <style>
         body { margin: 0; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; }
@@ -593,7 +593,7 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
-                      a.download = `${selectedStock}_Risk_Analysis_Report_${new Date().toISOString().split('T')[0]}.html`;
+                      a.download = `${selectedStock}_AI_Risk_Analysis_${new Date().toISOString().split('T')[0]}.html`;
                       document.body.appendChild(a);
                       a.click();
                       document.body.removeChild(a);
@@ -602,26 +602,26 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
                     className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2"
                   >
                     <FileText className="w-4 h-4" />
-                    Download HTML Report
+                    Download AI Report (HTML)
                   </button>
                   
                   <button
                     onClick={() => {
                       if (navigator.share) {
                         navigator.share({
-                          title: `${selectedStock} Risk Analysis Report`,
+                          title: `${selectedStock} AI-Enhanced Risk Analysis Report`,
                           text: fullReportContent.plainText.substring(0, 200) + '...',
                           url: window.location.href
                         });
                       } else {
                         navigator.clipboard.writeText(fullReportContent.plainText);
-                        alert('Report copied to clipboard!');
+                        alert('AI Report copied to clipboard!');
                       }
                     }}
                     className="px-6 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 flex items-center gap-2"
                   >
                     <Activity className="w-4 h-4" />
-                    Share Report
+                    Share AI Report
                   </button>
                 </div>
               </div>
