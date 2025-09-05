@@ -1,4 +1,3 @@
-// FILE: package.json
 {
   "name": "stock-risk-analyzer",
   "version": "1.0.0",
@@ -19,4 +18,3 @@
   }
 }
 
-// ==========================================
