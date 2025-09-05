@@ -527,39 +527,103 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
 
         {/* Full Report Modal */}
         {showFullReport && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-              <div className="p-6 border-b">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-bold">Full Analysis Report - {selectedStock}</h2>
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg w-full max-w-5xl h-[90vh] flex flex-col">
+              {/* Header */}
+              <div className="flex justify-between items-center p-6 border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+                <h2 className="text-xl font-bold">Professional Risk Analysis Report - {selectedStock}</h2>
+                <button
+                  onClick={() => setShowFullReport(false)}
+                  className="text-white hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center"
+                >
+                  ×
+                </button>
+              </div>
+              
+              {/* Content */}
+              <div className="flex-1 overflow-auto">
+                <div 
+                  className="p-6"
+                  dangerouslySetInnerHTML={{ __html: fullReportContent.html }}
+                />
+              </div>
+              
+              {/* Footer */}
+              <div className="p-6 border-t bg-gray-50 rounded-b-lg">
+                <div className="flex gap-3">
                   <button
-                    onClick={() => setShowFullReport(false)}
-                    className="text-gray-500 hover:text-gray-700 text-2xl"
+                    onClick={() => {
+                      const blob = new Blob([fullReportContent.plainText], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${selectedStock}_Risk_Analysis_Report_${new Date().toISOString().split('T')[0]}.txt`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
                   >
-                    ×
+                    <Download className="w-4 h-4" />
+                    Download Text Report
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${selectedStock} Risk Analysis Report</title>
+    <meta charset="UTF-8">
+    <style>
+        body { margin: 0; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        @media print { body { background: white; } .container { box-shadow: none; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        ${fullReportContent.html}
+    </div>
+</body>
+</html>`;
+                      const blob = new Blob([htmlContent], { type: 'text/html' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${selectedStock}_Risk_Analysis_Report_${new Date().toISOString().split('T')[0]}.html`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Download HTML Report
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({
+                          title: `${selectedStock} Risk Analysis Report`,
+                          text: fullReportContent.plainText.substring(0, 200) + '...',
+                          url: window.location.href
+                        });
+                      } else {
+                        navigator.clipboard.writeText(fullReportContent.plainText);
+                        alert('Report copied to clipboard!');
+                      }
+                    }}
+                    className="px-6 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 flex items-center gap-2"
+                  >
+                    <Activity className="w-4 h-4" />
+                    Share Report
                   </button>
                 </div>
-              </div>
-              <div className="p-6 overflow-y-auto max-h-[70vh]">
-                <pre className="whitespace-pre-wrap text-sm font-mono">{fullReportContent}</pre>
-              </div>
-              <div className="p-6 border-t">
-                <button
-                  onClick={() => {
-                    const blob = new Blob([fullReportContent], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${selectedStock}_analysis_report.txt`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                  }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Download Report
-                </button>
               </div>
             </div>
           </div>
