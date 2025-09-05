@@ -1,6 +1,4 @@
-(Serverless Function)
 export default async function handler(req, res) {
-  // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -20,7 +18,6 @@ export default async function handler(req, res) {
   try {
     console.log(`Fetching data for ${ticker} from Finnhub...`);
 
-    // Fetch quote data
     const quoteResponse = await fetch(
       `https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_API_KEY}`
     );
@@ -35,14 +32,12 @@ export default async function handler(req, res) {
       throw new Error('No valid data from Finnhub');
     }
 
-    // Fetch company profile
     const profileResponse = await fetch(
       `https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_API_KEY}`
     );
 
     const profileData = profileResponse.ok ? await profileResponse.json() : {};
 
-    // Process the data
     const currentPrice = quoteData.c;
     const previousClose = quoteData.pc;
     const dailyChange = currentPrice - previousClose;
@@ -52,7 +47,6 @@ export default async function handler(req, res) {
     const fiftyTwoWeekHigh = quoteData.h || currentPrice * 1.2;
     const fiftyTwoWeekLow = quoteData.l || currentPrice * 0.8;
 
-    // Generate technical indicators
     const rsi = 30 + Math.random() * 40;
     const volatility = ((fiftyTwoWeekHigh - fiftyTwoWeekLow) / currentPrice) * 100 / 4;
 
@@ -122,4 +116,3 @@ export default async function handler(req, res) {
     });
   }
 }
-
