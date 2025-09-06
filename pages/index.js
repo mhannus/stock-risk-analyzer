@@ -40,6 +40,8 @@ export default function StockAnalyzer() {
   const [showFullReport, setShowFullReport] = useState(false);
   const [fullReportContent, setFullReportContent] = useState(null);
   const [selectedStock, setSelectedStock] = useState('');
+  const [aiLoading, setAiLoading] = useState({});
+  const [aiCache, setAiCache] = useState({});
 
   // Fetch stock data from our API
   const fetchStockData = async (symbol) => {
@@ -130,6 +132,271 @@ export default function StockAnalyzer() {
     for (const ticker of stocks) {
       await runAnalysis(ticker);
     }
+  };
+
+  // Query Claude AI for enhanced analysis with better debugging
+  const getAIAnalysis = async (ticker, stockData) => {
+    console.log('🤖 Starting AI analysis for:', ticker);
+    
+    // Check cache first (1 hour expiry)
+    if (aiCache[ticker] && Date.now() - aiCache[ticker].timestamp < 3600000) {
+      console.log('📦 Using cached AI data for:', ticker);
+      return aiCache[ticker].analysis;
+    }
+
+    setAiLoading(prev => ({ ...prev, [ticker]: true }));
+
+    try {
+      console.log('🌐 Making API call to /api/claude-analysis');
+      console.log('📊 Stock data being sent:', stockData);
+      
+      const response = await fetch('/api/claude-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ticker,
+          stockData
+        })
+      });
+
+      console.log('📡 API Response status:', response.status);
+      console.log('📡 API Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API Error Response:', errorText);
+        throw new Error(`API error: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ API Response data:', data);
+      
+      if (data.success && data.analysis) {
+        console.log('🎉 AI analysis successful for:', ticker);
+        // Cache the successful response
+        setAiCache(prev => ({
+          ...prev,
+          [ticker]: {
+            analysis: data.analysis,
+            timestamp: Date.now()
+          }
+        }));
+
+        setAiLoading(prev => ({ ...prev, [ticker]: false }));
+        return data.analysis;
+      } else {
+        console.error('❌ Invalid response format:', data);
+        throw new Error('Invalid response format');
+      }
+
+    } catch (error) {
+      console.error('💥 AI Analysis error:', error);
+      setAiLoading(prev => ({ ...prev, [ticker]: false }));
+      
+      // Show user-friendly error in the UI
+      const errorAnalysis = {
+        keyCatalysts: [
+          `⚠️ AI analysis failed for ${ticker}: ${error.message}`,
+          "Please check browser console for detailed error information",
+          "Verify API key is correctly set in Vercel environment variables",
+          "Ensure claude-analysis.js endpoint is properly deployed"
+        ],
+        moneyFlow: {
+          institutional: "AI analysis unavailable",
+          retail: "Please check API configuration",
+          insiderActivity: "Error connecting to Claude AI",
+          optionsFlow: "API response failed",
+          volumeAnalysis: `Unable to analyze ${ticker} with AI`
+        },
+        recentEvents: [
+          "AI service temporarily unavailable",
+          "Check API key configuration in Vercel dashboard",
+          "Verify network connectivity and API endpoint deployment"
+        ],
+        sentiment: {
+          overall: "Error",
+          analystConsensus: "AI analysis failed - check console for details",
+          socialSentiment: "Unable to connect to Claude AI service",
+          positioning: "API configuration may need review"
+        }
+      };
+      
+      return errorAnalysis;
+    }
+  };
+
+  // Generate AI-enhanced report
+  const generateAIReport = async (ticker, data) => {
+    console.log('🔄 generateAIReport called for:', ticker);
+    
+    const currentDate = new Date().toLocaleDateString();
+    const rsiCondition = data.rsi > 70 ? 'Overbought' : data.rsi < 30 ? 'Oversold' : 'Neutral';
+    const riskLevel = data.riskScore > 70 ? 'HIGH' : data.riskScore > 40 ? 'MODERATE' : 'LOW';
+
+    console.log('🧠 About to call getAIAnalysis...');
+    // Get AI analysis
+    const aiAnalysis = await getAIAnalysis(ticker, data);
+    console.log('🎉 getAIAnalysis completed, result:', aiAnalysis);
+
+    const aiSection = aiAnalysis ? `
+        <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+          <h2 style="color: #333; margin-top: 0; font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">🤖 AI Market Intelligence</h2>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div>
+              <h3 style="color: #6f42c1; margin: 10px 0; font-size: 16px;">🎯 Key Catalysts</h3>
+              <ul style="margin: 10px 0; padding-left: 20px; color: #333;">
+                ${aiAnalysis.keyCatalysts.map(catalyst => `<li style="margin: 8px 0;">${catalyst}</li>`).join('')}
+              </ul>
+            </div>
+            
+            <div>
+              <h3 style="color: #6f42c1; margin: 10px 0; font-size: 16px;">💰 Money Flow Analysis</h3>
+              <div style="font-size: 14px; color: #333;">
+                <p style="margin: 5px 0;"><strong>Institutional:</strong> ${aiAnalysis.moneyFlow.institutional}</p>
+                <p style="margin: 5px 0;"><strong>Retail:</strong> ${aiAnalysis.moneyFlow.retail}</p>
+                <p style="margin: 5px 0;"><strong>Options Flow:</strong> ${aiAnalysis.moneyFlow.optionsFlow}</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+            <h3 style="color: #6f42c1; margin: 0 0 10px 0; font-size: 16px;">📰 Recent Events</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #333; font-size: 14px;">
+              ${aiAnalysis.recentEvents.map(event => `<li style="margin: 5px 0;">${event}</li>`).join('')}
+            </ul>
+          </div>
+
+          <div style="background: ${aiAnalysis.sentiment.overall === 'Bullish' ? '#d4edda' : aiAnalysis.sentiment.overall === 'Bearish' ? '#f8d7da' : '#fff3cd'}; padding: 15px; border-radius: 6px; border-left: 4px solid ${aiAnalysis.sentiment.overall === 'Bullish' ? '#28a745' : aiAnalysis.sentiment.overall === 'Bearish' ? '#dc3545' : '#ffc107'};">
+            <h3 style="color: ${aiAnalysis.sentiment.overall === 'Bullish' ? '#155724' : aiAnalysis.sentiment.overall === 'Bearish' ? '#721c24' : '#856404'}; margin: 0 0 10px 0; font-size: 16px;">📊 Market Sentiment: ${aiAnalysis.sentiment.overall}</h3>
+            <div style="font-size: 14px; color: ${aiAnalysis.sentiment.overall === 'Bullish' ? '#155724' : aiAnalysis.sentiment.overall === 'Bearish' ? '#721c24' : '#856404'};">
+              <p style="margin: 5px 0;">${aiAnalysis.sentiment.analystConsensus}</p>
+              <p style="margin: 5px 0;">${aiAnalysis.sentiment.socialSentiment}</p>
+            </div>
+          </div>
+        </div>
+    ` : '';
+
+    console.log('📝 Building HTML report...');
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+          <h1 style="margin: 0; font-size: 28px;">${ticker} - AI-Enhanced Risk Analysis</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">Generated on ${currentDate} • Powered by Claude AI</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px;">
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: bold; color: #333;">$${data.price}</div>
+            <div style="color: #666; margin-top: 5px;">Current Price</div>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: bold; color: ${data.dailyChangePercent >= 0 ? '#28a745' : '#dc3545'};">
+              ${data.dailyChangePercent >= 0 ? '+' : ''}${data.dailyChangePercent}%
+            </div>
+            <div style="color: #666; margin-top: 5px;">Daily Change</div>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: bold; color: ${data.signal === 'BUY' ? '#28a745' : data.signal === 'SELL' ? '#dc3545' : '#ffc107'};">
+              ${data.signal}
+            </div>
+            <div style="color: #666; margin-top: 5px;">AI Signal</div>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: bold; color: ${data.riskScore > 70 ? '#dc3545' : data.riskScore > 40 ? '#ffc107' : '#28a745'};">
+              ${data.riskScore}/100
+            </div>
+            <div style="color: #666; margin-top: 5px;">Risk Score</div>
+          </div>
+        </div>
+
+        ${aiSection}
+
+        <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+          <h2 style="color: #333; margin-top: 0; font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">Executive Summary</h2>
+          <p><strong>Investment Signal:</strong> ${data.signal}</p>
+          <p><strong>Risk Level:</strong> ${riskLevel} (${data.riskScore}/100)</p>
+          <p><strong>Technical Position:</strong> RSI ${data.rsi} - ${rsiCondition}</p>
+          <p><strong>Volatility:</strong> ${data.volatility}% | <strong>Beta:</strong> ${data.beta}</p>
+        </div>
+
+        <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+          <h2 style="color: #333; margin-top: 0; font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">Price Targets</h2>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+              <h4 style="color: #6f42c1; margin: 10px 0;">Short-term (1-4 weeks)</h4>
+              <p style="margin: 5px 0;"><strong>Support:</strong> $${data.shortTermLow}</p>
+              <p style="margin: 5px 0;"><strong>Resistance:</strong> $${data.shortTermHigh}</p>
+            </div>
+            <div>
+              <h4 style="color: #6f42c1; margin: 10px 0;">Medium-term (1-3 months)</h4>
+              <p style="margin: 5px 0;"><strong>Support:</strong> $${data.mediumTermLow}</p>
+              <p style="margin: 5px 0;"><strong>Resistance:</strong> $${data.mediumTermHigh}</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: ${data.signal === 'BUY' ? '#d4edda' : data.signal === 'SELL' ? '#f8d7da' : '#fff3cd'}; padding: 20px; border-radius: 8px; border-left: 4px solid ${data.signal === 'BUY' ? '#28a745' : data.signal === 'SELL' ? '#dc3545' : '#ffc107'};">
+          <h3 style="margin-top: 0; color: ${data.signal === 'BUY' ? '#155724' : data.signal === 'SELL' ? '#721c24' : '#856404'};">
+            AI Recommendation: ${data.signal}
+          </h3>
+          <p style="margin-bottom: 0; color: ${data.signal === 'BUY' ? '#155724' : data.signal === 'SELL' ? '#721c24' : '#856404'};">
+            ${data.signal === 'BUY' ? 'AI analysis and technical indicators support position building with appropriate risk management.' : 
+              data.signal === 'SELL' ? 'AI intelligence suggests elevated risk. Consider reducing exposure.' : 
+              'Mixed AI and technical signals suggest monitoring before significant position changes.'}
+          </p>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #666; font-size: 14px;">
+          <p style="margin: 0;">AI-enhanced risk analysis powered by Claude AI and comprehensive technical framework.</p>
+          <p style="margin: 5px 0 0 0;">For educational purposes only. Not financial advice.</p>
+        </div>
+      </div>
+    `;
+
+    const plainText = `${ticker} - AI-ENHANCED RISK ANALYSIS
+Generated: ${currentDate} • Powered by Claude AI
+
+EXECUTIVE SUMMARY
+Current Price: $${data.price}
+Daily Change: ${data.dailyChangePercent}%
+Signal: ${data.signal}
+Risk Score: ${data.riskScore}/100 (${riskLevel})
+RSI: ${data.rsi} (${rsiCondition})
+Beta: ${data.beta} | Volatility: ${data.volatility}%
+
+AI MARKET INTELLIGENCE
+Key Catalysts:
+${aiAnalysis.keyCatalysts.map(catalyst => `• ${catalyst}`).join('\n')}
+
+Money Flow Analysis:
+• Institutional: ${aiAnalysis.moneyFlow.institutional}
+• Retail: ${aiAnalysis.moneyFlow.retail}
+• Options Flow: ${aiAnalysis.moneyFlow.optionsFlow}
+
+Recent Events:
+${aiAnalysis.recentEvents.map(event => `• ${event}`).join('\n')}
+
+Market Sentiment: ${aiAnalysis.sentiment.overall}
+• ${aiAnalysis.sentiment.analystConsensus}
+• ${aiAnalysis.sentiment.socialSentiment}
+
+PRICE TARGETS
+Short-term (1-4 weeks): $${data.shortTermLow} - $${data.shortTermHigh}
+Medium-term (1-3 months): $${data.mediumTermLow} - $${data.mediumTermHigh}
+
+AI RECOMMENDATION: ${data.signal}
+${data.signal === 'BUY' ? 'AI analysis supports position building.' : 
+  data.signal === 'SELL' ? 'AI suggests caution and risk management.' : 
+  'AI recommends monitoring before changes.'}
+
+---
+AI-enhanced analysis powered by Claude AI. For educational purposes only.`;
+
+    console.log('✅ Report generation complete');
+    return { html, plainText };
   };
 
   // Simple report generation that always works
@@ -238,18 +505,44 @@ Professional risk analysis. For educational purposes only.`;
     return { html, plainText };
   };
 
-  // Show report - simplified and reliable
-  const showReport = (ticker) => {
+  // Show report with AI analysis
+  const showReport = async (ticker) => {
+    alert('Button clicked for: ' + ticker); // Basic test
+    console.log('🎯 showReport called for:', ticker);
+    
     const data = analysisData[ticker];
     if (!data) {
+      console.log('❌ No analysis data found for:', ticker);
       alert('Please run analysis first for ' + ticker);
       return;
     }
 
+    console.log('📊 Found analysis data for:', ticker, data);
     setSelectedStock(ticker);
-    const report = generateSimpleReport(ticker, data);
-    setFullReportContent(report);
     setShowFullReport(true);
+    
+    // Show loading message
+    console.log('💫 Setting loading state...');
+    setFullReportContent({
+      html: '<div style="text-align: center; padding: 3rem;"><div style="font-size: 1.2rem; color: #667eea; margin-bottom: 1rem;">🤖 Generating AI-Enhanced Report...</div><div style="color: #999;">Analyzing market intelligence and key catalysts</div><div style="margin-top: 1rem; font-size: 0.9rem; color: #666;">This may take a few moments</div></div>',
+      plainText: 'Generating AI-enhanced report...'
+    });
+
+    try {
+      console.log('🚀 Starting AI report generation...');
+      // Generate AI-enhanced report
+      const report = await generateAIReport(ticker, data);
+      console.log('✅ AI report generated successfully');
+      setFullReportContent(report);
+    } catch (error) {
+      console.error('💥 Error generating AI report:', error);
+      // Fallback to simple report
+      const fallbackReport = generateSimpleReport(ticker, data);
+      setFullReportContent({
+        html: fallbackReport.html + '<div style="background: #fff3cd; padding: 15px; margin-top: 20px; border-radius: 8px; border-left: 4px solid #ffc107;"><strong>Note:</strong> AI analysis temporarily unavailable. Report generated with technical analysis only.</div>',
+        plainText: fallbackReport.plainText + '\n\nNote: AI analysis temporarily unavailable.'
+      });
+    }
   };
 
   // Add new stock to portfolio
@@ -454,11 +747,24 @@ Professional risk analysis. For educational purposes only.`;
                           Re-analyze
                         </button>
                         <button
-                          onClick={() => showReport(ticker)}
-                          className="flex-1 px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm flex items-center justify-center gap-1"
+                          onClick={() => {
+                            console.log('🟢 AI Report button clicked for:', ticker);
+                            showReport(ticker);
+                          }}
+                          disabled={aiLoading[ticker]}
+                          className="flex-1 px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm flex items-center justify-center gap-1 disabled:opacity-50"
                         >
-                          <FileText className="w-4 h-4" />
-                          <span>Full Report</span>
+                          {aiLoading[ticker] ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              <span>AI Analysis...</span>
+                            </>
+                          ) : (
+                            <>
+                              <FileText className="w-4 h-4" />
+                              <span>🤖 AI Report</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
