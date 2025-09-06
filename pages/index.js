@@ -1,21 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, X, Download, RefreshCw, TrendingUp, AlertTriangle, DollarSign, Activity, Play, Clock, TrendingDown, Trash2, FileText } from 'lucide-react';
 
-// Tooltip Component
-const Tooltip = ({ children, id, content }) => {
+// Simple, reliable tooltip component
+const Tooltip = ({ children, content }) => {
   const [isVisible, setIsVisible] = useState(false);
   
   return (
-    <div 
-      className="relative inline-block"
-      onMouseEnter={() => setIsVisible(true)}
-      onMouseLeave={() => setIsVisible(false)}
-    >
-      <span className="cursor-help">{children}</span>
+    <div className="relative inline-block">
+      <div
+        onMouseEnter={() => setIsVisible(true)}
+        onMouseLeave={() => setIsVisible(false)}
+        className="cursor-help"
+      >
+        {children}
+      </div>
       {isVisible && (
-        <div className="absolute bottom-full left-0 mb-2 z-50 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg transform -translate-x-1/4">
+        <div 
+          className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black text-white text-xs rounded whitespace-nowrap"
+          style={{ 
+            zIndex: 10000,
+            maxWidth: '300px',
+            whiteSpace: 'normal'
+          }}
+        >
           {content}
-          <div className="absolute top-full left-8 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
         </div>
       )}
     </div>
@@ -29,7 +38,7 @@ export default function StockAnalyzer() {
   const [loading, setLoading] = useState({});
   const [lastUpdate, setLastUpdate] = useState(null);
   const [showFullReport, setShowFullReport] = useState(false);
-  const [fullReportContent, setFullReportContent] = useState('');
+  const [fullReportContent, setFullReportContent] = useState(null);
   const [selectedStock, setSelectedStock] = useState('');
 
   // Fetch stock data from our API
@@ -123,94 +132,123 @@ export default function StockAnalyzer() {
     }
   };
 
-  // Generate comprehensive report for individual stock
-  const generateFullReport = (ticker) => {
-    const data = analysisData[ticker];
-    if (!data) return '';
-
+  // Simple report generation that always works
+  const generateSimpleReport = (ticker, data) => {
+    const currentDate = new Date().toLocaleDateString();
     const rsiCondition = data.rsi > 70 ? 'Overbought' : data.rsi < 30 ? 'Oversold' : 'Neutral';
-    const priceAction = data.dailyChangePercent > 5 ? 'Strong Upward Movement' : 
-                       data.dailyChangePercent < -5 ? 'Significant Decline' :
-                       data.dailyChangePercent > 0 ? 'Modest Gains' : 'Slight Decline';
     const riskLevel = data.riskScore > 70 ? 'HIGH' : data.riskScore > 40 ? 'MODERATE' : 'LOW';
 
-    return `# ${ticker} - Comprehensive Risk Analysis Report
-Generated: ${new Date().toLocaleDateString()}
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+          <h1 style="margin: 0; font-size: 28px;">${ticker} - Risk Analysis Report</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">Generated on ${currentDate}</p>
+        </div>
 
-## Executive Summary
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px;">
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: bold; color: #333;">$${data.price}</div>
+            <div style="color: #666; margin-top: 5px;">Current Price</div>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: bold; color: ${data.dailyChangePercent >= 0 ? '#28a745' : '#dc3545'};">
+              ${data.dailyChangePercent >= 0 ? '+' : ''}${data.dailyChangePercent}%
+            </div>
+            <div style="color: #666; margin-top: 5px;">Daily Change</div>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: bold; color: ${data.signal === 'BUY' ? '#28a745' : data.signal === 'SELL' ? '#dc3545' : '#ffc107'};">
+              ${data.signal}
+            </div>
+            <div style="color: #666; margin-top: 5px;">Signal</div>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 24px; font-weight: bold; color: ${data.riskScore > 70 ? '#dc3545' : data.riskScore > 40 ? '#ffc107' : '#28a745'};">
+              ${data.riskScore}/100
+            </div>
+            <div style="color: #666; margin-top: 5px;">Risk Score</div>
+          </div>
+        </div>
 
-**Current Price Position:** $${data.price}
-**Daily Movement:** ${data.dailyChangePercent}% (${priceAction})
-**Risk Assessment:** ${riskLevel} RISK (Score: ${data.riskScore}/100)
-**Technical Position:** RSI ${data.rsi} - ${rsiCondition}
-**Investment Signal:** ${data.signal}
+        <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+          <h2 style="color: #333; margin-top: 0; font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">Executive Summary</h2>
+          <p><strong>Investment Signal:</strong> ${data.signal}</p>
+          <p><strong>Risk Level:</strong> ${riskLevel} (${data.riskScore}/100)</p>
+          <p><strong>Technical Position:</strong> RSI ${data.rsi} - ${rsiCondition}</p>
+          <p><strong>Volatility:</strong> ${data.volatility}% | <strong>Beta:</strong> ${data.beta}</p>
+        </div>
 
-## Market Context Analysis
+        <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+          <h2 style="color: #333; margin-top: 0; font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">Price Targets</h2>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+              <h4 style="color: #6f42c1; margin: 10px 0;">Short-term (1-4 weeks)</h4>
+              <p style="margin: 5px 0;"><strong>Support:</strong> $${data.shortTermLow}</p>
+              <p style="margin: 5px 0;"><strong>Resistance:</strong> $${data.shortTermHigh}</p>
+            </div>
+            <div>
+              <h4 style="color: #6f42c1; margin: 10px 0;">Medium-term (1-3 months)</h4>
+              <p style="margin: 5px 0;"><strong>Support:</strong> $${data.mediumTermLow}</p>
+              <p style="margin: 5px 0;"><strong>Resistance:</strong> $${data.mediumTermHigh}</p>
+            </div>
+          </div>
+        </div>
 
-The current price of $${data.price} reflects ${priceAction.toLowerCase()} in recent trading. With an RSI of ${data.rsi}, the stock is in ${rsiCondition.toLowerCase()} territory, suggesting ${
-  data.rsi > 70 ? 'potential for near-term consolidation or pullback' :
-  data.rsi < 30 ? 'possible oversold bounce opportunity' :
-  'balanced momentum conditions'
-}.
+        <div style="background: ${data.signal === 'BUY' ? '#d4edda' : data.signal === 'SELL' ? '#f8d7da' : '#fff3cd'}; padding: 20px; border-radius: 8px; border-left: 4px solid ${data.signal === 'BUY' ? '#28a745' : data.signal === 'SELL' ? '#dc3545' : '#ffc107'};">
+          <h3 style="margin-top: 0; color: ${data.signal === 'BUY' ? '#155724' : data.signal === 'SELL' ? '#721c24' : '#856404'};">
+            Recommendation: ${data.signal}
+          </h3>
+          <p style="margin-bottom: 0; color: ${data.signal === 'BUY' ? '#155724' : data.signal === 'SELL' ? '#721c24' : '#856404'};">
+            ${data.signal === 'BUY' ? 'Technical indicators support position building with appropriate risk management.' : 
+              data.signal === 'SELL' ? 'Risk indicators suggest caution. Consider reducing exposure.' : 
+              'Mixed signals suggest monitoring before significant position changes.'}
+          </p>
+        </div>
 
-## Risk Range Analysis
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #666; font-size: 14px;">
+          <p style="margin: 0;">Professional risk analysis generated using comprehensive technical framework.</p>
+          <p style="margin: 5px 0 0 0;">For educational purposes only. Not financial advice.</p>
+        </div>
+      </div>
+    `;
 
-**Short-term Range (1-4 weeks):** $${data.shortTermLow} - $${data.shortTermHigh}
-**Medium-term Range (1-3 months):** $${data.mediumTermLow} - $${data.mediumTermHigh}
+    const plainText = `${ticker} - RISK ANALYSIS REPORT
+Generated: ${currentDate}
 
-**Current Position within Ranges:**
-${data.price < data.shortTermLow ? '⚠️ Trading BELOW short-term range - potential oversold condition' :
-  data.price > data.shortTermHigh ? '⚠️ Trading ABOVE short-term range - extended/overbought' :
-  '✅ Trading within established short-term range parameters'}
+EXECUTIVE SUMMARY
+Current Price: $${data.price}
+Daily Change: ${data.dailyChangePercent}%
+Signal: ${data.signal}
+Risk Score: ${data.riskScore}/100 (${riskLevel})
+RSI: ${data.rsi} (${rsiCondition})
+Beta: ${data.beta} | Volatility: ${data.volatility}%
 
-## Volume & Momentum Indicators
+PRICE TARGETS
+Short-term (1-4 weeks): $${data.shortTermLow} - $${data.shortTermHigh}
+Medium-term (1-3 months): $${data.mediumTermLow} - $${data.mediumTermHigh}
 
-- **Beta:** ${data.beta} (${data.beta > 1.5 ? 'High volatility vs market' : data.beta > 1 ? 'Above-market volatility' : 'Below-market volatility'})
-- **Volatility:** ${data.volatility}% (${data.volatility > 30 ? 'High' : data.volatility > 20 ? 'Moderate' : 'Low'} volatility environment)
-
-## Investment Recommendation
-
-**Signal: ${data.signal}**
-
-${data.signal === 'BUY' ? '✅ FAVORABLE RISK PROFILE - Consider for position building' :
-  data.signal === 'SELL' ? '❌ ELEVATED RISK - Exercise caution, consider smaller position sizes' :
-  '⏸️ MODERATE RISK - Suitable for balanced portfolios, monitor for better entry/exit points'}
-
-## Risk Management
-
-**Position Sizing Recommendation:**
-${data.riskScore < 30 ? '- Core position: Up to 15% portfolio weight' :
-  data.riskScore < 60 ? '- Standard position: 5-10% portfolio weight' :
-  '- Reduced position: Maximum 3-5% portfolio weight'}
-
-**Key Levels to Monitor:**
-- **Support:** $${data.shortTermLow} (Short-term low)
-- **Resistance:** $${data.shortTermHigh} (Short-term high)
-- **Stop-Loss:** $${(data.price * 0.92).toFixed(2)} (-8%)
-- **Take-Profit:** $${(data.price * 1.15).toFixed(2)} (+15%)
-
-## Key Catalysts to Monitor
-
-- Earnings announcements and guidance updates
-- Sector-specific developments and competitive dynamics
-- Macro-economic shifts affecting the industry
-- Technical breakout/breakdown levels
-
-## Conclusion
-
-${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for position building.' :
-  data.signal === 'SELL' ? 'Current analysis suggests elevated risk requiring caution.' :
-  'Current analysis suggests a balanced approach with careful monitoring.'}
+RECOMMENDATION: ${data.signal}
+${data.signal === 'BUY' ? 'Technical indicators support position building.' : 
+  data.signal === 'SELL' ? 'Risk indicators suggest caution.' : 
+  'Mixed signals suggest monitoring.'}
 
 ---
-*Analysis generated using enhanced multi-factor risk assessment framework incorporating technical analysis, fundamental metrics, and macro-economic factors.*`;
+Professional risk analysis. For educational purposes only.`;
+
+    return { html, plainText };
   };
 
-  // Show full report modal
+  // Show report - simplified and reliable
   const showReport = (ticker) => {
-    const report = generateFullReport(ticker);
-    setFullReportContent(report);
+    const data = analysisData[ticker];
+    if (!data) {
+      alert('Please run analysis first for ' + ticker);
+      return;
+    }
+
     setSelectedStock(ticker);
+    const report = generateSimpleReport(ticker, data);
+    setFullReportContent(report);
     setShowFullReport(true);
   };
 
@@ -365,15 +403,7 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
                         <span className="font-semibold">${data.price}</span>
                       </div>
                       <div className="flex justify-between">
-                        <Tooltip
-                          id={`change-${ticker}`}
-                          content={
-                            <div>
-                              <div className="font-semibold mb-1">Daily Price Change</div>
-                              <div>The percentage change in stock price from the previous trading day. Positive values (green) indicate price increases, negative values (red) indicate price decreases.</div>
-                            </div>
-                          }
-                        >
+                        <Tooltip content="The percentage change in stock price from the previous trading day">
                           <span className="text-gray-600">Change:</span>
                         </Tooltip>
                         <span className={`font-semibold ${data.dailyChangePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -381,40 +411,13 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <Tooltip
-                          id={`rsi-${ticker}`}
-                          content={
-                            <div>
-                              <div className="font-semibold mb-1">Relative Strength Index (RSI)</div>
-                              <div className="mb-2">A momentum indicator measuring the speed and magnitude of price changes (0-100 scale):</div>
-                              <div className="space-y-1">
-                                <div>• <span className="text-red-300">70+</span>: Potentially overbought</div>
-                                <div>• <span className="text-yellow-300">30-70</span>: Neutral range</div>
-                                <div>• <span className="text-green-300">Below 30</span>: Potentially oversold</div>
-                              </div>
-                            </div>
-                          }
-                        >
+                        <Tooltip content="RSI (0-100): 70+ Overbought, 30-70 Neutral, Below 30 Oversold">
                           <span className="text-gray-600">RSI:</span>
                         </Tooltip>
                         <span className="font-semibold">{data.rsi}</span>
                       </div>
                       <div className="flex justify-between">
-                        <Tooltip
-                          id={`risk-${ticker}`}
-                          content={
-                            <div>
-                              <div className="font-semibold mb-1">Risk Score (0-100)</div>
-                              <div className="mb-2">A composite risk rating based on volatility, technical indicators, and market conditions:</div>
-                              <div className="space-y-1">
-                                <div>• <span className="text-green-300">0-30</span>: Low risk</div>
-                                <div>• <span className="text-yellow-300">31-60</span>: Moderate risk</div>
-                                <div>• <span className="text-orange-300">61-80</span>: High risk</div>
-                                <div>• <span className="text-red-300">81-100</span>: Very high risk</div>
-                              </div>
-                            </div>
-                          }
-                        >
+                        <Tooltip content="Risk Score (0-100): 0-30 Low Risk, 31-60 Moderate, 61+ High Risk">
                           <span className="text-gray-600">Risk Score:</span>
                         </Tooltip>
                         <span className="font-semibold">{data.riskScore}/100</span>
@@ -434,17 +437,7 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
 
                       {/* Risk Ranges */}
                       <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mt-4">
-                        <Tooltip
-                          id={`ranges-${ticker}`}
-                          content={
-                            <div>
-                              <div className="font-semibold mb-1">Risk Range Analysis</div>
-                              <div className="mb-2">Price ranges calculated independently from current price position.</div>
-                              <div className="mb-2"><strong>Short-term:</strong> Expected 1-4 week trading range based on current volatility</div>
-                              <div><strong>Medium-term:</strong> Expected 1-3 month range incorporating fundamental factors</div>
-                            </div>
-                          }
-                        >
+                        <Tooltip content="Expected price ranges: Short-term (1-4 weeks), Medium-term (1-3 months)">
                           <h4 className="font-semibold text-indigo-800 mb-2">Risk Ranges</h4>
                         </Tooltip>
                         <div className="text-sm space-y-1">
@@ -465,7 +458,7 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
                           className="flex-1 px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm flex items-center justify-center gap-1"
                         >
                           <FileText className="w-4 h-4" />
-                          Full Report
+                          <span>Full Report</span>
                         </button>
                       </div>
                     </div>
@@ -531,7 +524,7 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
             <div className="bg-white rounded-lg w-full max-w-5xl h-[90vh] flex flex-col">
               {/* Header */}
               <div className="flex justify-between items-center p-6 border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
-                <h2 className="text-xl font-bold">Professional Risk Analysis Report - {selectedStock}</h2>
+                <h2 className="text-xl font-bold">Risk Analysis Report - {selectedStock}</h2>
                 <button
                   onClick={() => setShowFullReport(false)}
                   className="text-white hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center"
@@ -541,10 +534,9 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
               </div>
               
               {/* Content */}
-              <div className="flex-1 overflow-auto">
+              <div className="flex-1 overflow-auto" style={{ maxHeight: 'calc(90vh - 160px)' }}>
                 <div 
-                  className="p-6"
-                  dangerouslySetInnerHTML={{ __html: fullReportContent.html }}
+                  dangerouslySetInnerHTML={{ __html: fullReportContent?.html || '<div style="text-align: center; padding: 2rem; color: #666;">No report content available</div>' }}
                 />
               </div>
               
@@ -588,12 +580,6 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
                   >
                     <Activity className="w-4 h-4" />
                     Share Report
-                  </button>
-                </div>
-              </div>2"
-                  >
-                    <Activity className="w-4 h-4" />
-                    Share AI Report
                   </button>
                 </div>
               </div>
