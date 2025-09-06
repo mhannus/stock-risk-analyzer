@@ -524,7 +524,7 @@ Professional risk analysis. For educational purposes only.`;
             <div className="bg-white rounded-lg w-full max-w-5xl h-[90vh] flex flex-col">
               {/* Header */}
               <div className="flex justify-between items-center p-6 border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
-                <h2 className="text-xl font-bold">Risk Analysis Report - {selectedStock}</h2>
+                <h2 className="text-xl font-bold">🤖 AI-Enhanced Risk Analysis - {selectedStock}</h2>
                 <button
                   onClick={() => setShowFullReport(false)}
                   className="text-white hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center"
