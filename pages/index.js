@@ -728,16 +728,32 @@ Professional risk analysis. For educational purposes only.`;
                         </span>
                       </div>
 
-                      {/* Risk Ranges */}
+                      {/* Enhanced Risk Ranges */}
                       <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mt-4">
-                        <Tooltip content="Expected price ranges: Short-term (1-4 weeks), Medium-term (1-3 months)">
-                          <h4 className="font-semibold text-indigo-800 mb-2">Risk Ranges</h4>
+                        <Tooltip content="Independent risk ranges calculated using signal strength model - NOT centered on current price">
+                          <h4 className="font-semibold text-indigo-800 mb-2">Risk Ranges (Independent)</h4>
                         </Tooltip>
                         <div className="text-sm space-y-1">
-                          <div><strong>Short-term:</strong> ${data.shortTermLow} - ${data.shortTermHigh}</div>
-                          <div><strong>Medium-term:</strong> ${data.mediumTermLow} - ${data.mediumTermHigh}</div>
+                          <div><strong>Trade (1-4 weeks):</strong> ${data.shortTermLow} - ${data.shortTermHigh}</div>
+                          <div><strong>Trend (1-3 months):</strong> ${data.mediumTermLow} - ${data.mediumTermHigh}</div>
+                          <div className="text-xs text-indigo-600 mt-2">
+                            <strong>Position:</strong> {data.positionAnalysis}
+                          </div>
                         </div>
                       </div>
+
+                      {/* Signal Strength Breakdown */}
+                      {data.signalComponents && (
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-2">
+                          <h5 className="font-semibold text-gray-700 mb-2 text-sm">Signal Components</h5>
+                          <div className="grid grid-cols-2 gap-1 text-xs">
+                            <div>Volume: {data.signalComponents.volume}</div>
+                            <div>Momentum: {data.signalComponents.momentum}</div>
+                            <div>Volatility: {data.signalComponents.volatility}</div>
+                            <div>Trend: {data.signalComponents.trend}</div>
+                          </div>
+                        </div>
+                      )}
 
                       <div className="flex gap-2 mt-4">
                         <button
