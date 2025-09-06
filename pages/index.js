@@ -588,7 +588,9 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
                   >
                     <Activity className="w-4 h-4" />
                     Share Report
-                  </button>2"
+                  </button>
+                </div>
+              </div>2"
                   >
                     <Activity className="w-4 h-4" />
                     Share AI Report
