@@ -360,6 +360,14 @@ Professional risk analysis. For educational purposes only.`;
                 <Download className="w-4 h-4" />
                 Export to Spreadsheet
               </button>
+              
+              <button
+                onClick={testAPI}
+                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 flex items-center gap-2"
+              >
+                <AlertTriangle className="w-4 h-4" />
+                Test AI API
+              </button>
             </div>
           </div>
           
