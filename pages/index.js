@@ -553,7 +553,8 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
                 <div className="flex gap-3">
                   <button
                     onClick={() => {
-                      const blob = new Blob([fullReportContent.plainText], { type: 'text/plain' });
+                      const content = fullReportContent?.plainText || 'Report content not available';
+                      const blob = new Blob([content], { type: 'text/plain' });
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
@@ -585,7 +586,7 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
 </head>
 <body>
     <div class="container">
-        ${fullReportContent.html}
+        ${fullReportContent?.html || '<div>Report content not available</div>'}
     </div>
 </body>
 </html>`;
@@ -607,14 +608,15 @@ ${data.signal === 'BUY' ? 'Current analysis suggests favorable conditions for po
                   
                   <button
                     onClick={() => {
+                      const content = fullReportContent?.plainText || 'Report content not available';
                       if (navigator.share) {
                         navigator.share({
                           title: `${selectedStock} AI-Enhanced Risk Analysis Report`,
-                          text: fullReportContent.plainText.substring(0, 200) + '...',
+                          text: content.substring(0, 200) + '...',
                           url: window.location.href
                         });
                       } else {
-                        navigator.clipboard.writeText(fullReportContent.plainText);
+                        navigator.clipboard.writeText(content);
                         alert('AI Report copied to clipboard!');
                       }
                     }}
